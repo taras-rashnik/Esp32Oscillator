@@ -22,7 +22,7 @@ void test_send_receive_empty_buffer(void) {
 void setup() {
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
-    delay(2000);
+    // delay(2000);
 
     UNITY_BEGIN();    // IMPORTANT LINE!
     RUN_TEST(test_send_receive_buffer);
