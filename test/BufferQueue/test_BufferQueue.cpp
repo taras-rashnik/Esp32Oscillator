@@ -2,35 +2,45 @@
 #include <unity.h>
 #include <BufferQueue.h>
 #include "WritingTask.h"
+#include "ReadingTask.h"
 
-// void setUp(void) {
-// // set stuff up here
-// }
-
-// void tearDown(void) {
-// // clean stuff up here
-// }
-
-void test_send_receive_buffer(void) {
-    TEST_ASSERT_EQUAL(13, 13);
+void test_constructor(void)
+{
+    BufferQueue queue(1024, 8);
 }
 
-void test_send_receive_empty_buffer(void) {
-    TEST_ASSERT_EQUAL(14, 14);
+void test_write_read(void)
+{
+    size_t bufferSize = 16;
+    size_t numberOfBuffers = 4;
+    size_t writeChunkSize = 16;
+    size_t readChunkSize = 16;
+    size_t dataLength = 240;
+    uint32_t writeDelayMs = 20;
+    uint32_t readDelayMs = 20;
+
+    BufferQueue queue(bufferSize, numberOfBuffers);
+    WritingTask writingTask(queue, writeChunkSize, dataLength, writeDelayMs);
+    ReadingTask readingTask(queue, readChunkSize, dataLength, readDelayMs);
+
+    writingTask.start();
+    readingTask.start();
+
+    writingTask.join();
+    readingTask.join();
+
+    TEST_ASSERT_TRUE(readingTask.success());
 }
 
-void setup() {
-    // NOTE!!! Wait for >2 secs
-    // if board doesn't support software reset via Serial.DTR/RTS
-    // delay(2000);
-
-    UNITY_BEGIN();    // IMPORTANT LINE!
-    RUN_TEST(test_send_receive_buffer);
-    RUN_TEST(test_send_receive_empty_buffer);
+void setup()
+{
+    UNITY_BEGIN(); // IMPORTANT LINE!
+    RUN_TEST(test_constructor);
+    RUN_TEST(test_write_read);
     UNITY_END(); // stop unit testing
 }
 
-
-void loop() {
+void loop()
+{
     delay(1000);
 }

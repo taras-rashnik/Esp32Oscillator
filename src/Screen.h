@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <M5Stack.h>
-#include "boost/noncopyable.hpp"
+#include <noncopyable.hpp>
 #include "Samples.h"
 
 #define M_SIZE 0.667

@@ -3,16 +3,17 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <noncopyable.hpp>
 
-class Task
+class Task : boost::noncopyable
 {
 private:
     const char *_name = "No name";
-    uint32_t _stackSize = 2048;
-    UBaseType_t _priority = 1;
-    BaseType_t _core = 1;
+    const uint32_t _stackSize = 2048;
+    const UBaseType_t _priority = 1;
+    const BaseType_t _core = 1;
+    
     TaskHandle_t _taskHandle = 0;
-
     volatile bool _running = false;
     volatile bool _stopping = false;
 
@@ -29,6 +30,7 @@ public:
             _core);
 
         assert(res == pdPASS);
+        delay(1);
     }
 
     void stop()

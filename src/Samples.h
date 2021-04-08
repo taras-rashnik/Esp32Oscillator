@@ -2,7 +2,7 @@
 #define __Samples_h__
 
 #include <stdint.h>
-#include "boost/noncopyable.hpp"
+#include <noncopyable.hpp>
 
 class Samples : boost::noncopyable
 {
