@@ -26,17 +26,23 @@ protected:
         sample_t array[_chunkSize];
         size_t numOfIterations = _dataLength / _chunkSize;
 
+        // Serial.println("WritingTask::run() begin");
+
         for (size_t i = 0; i < numOfIterations; i++)
         {
-            // prepare buffer 
+            // prepare buffer
             for (size_t j = 0; j < _chunkSize; j++)
             {
                 array[j] = samplesCounter++;
             }
-            
+
             _queue.write(array, _chunkSize);
             delay(_delayMs);
-        }       
+
+            // Serial.println(String("WritingTask::run() i: ") + i);
+        }
+
+        // Serial.println("WritingTask::run() end");
     }
 };
 

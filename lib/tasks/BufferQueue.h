@@ -98,8 +98,10 @@ private:
     {
         if (_currentWriteBuffer != NULL && _currentWriteBuffer->full())
         {
+            // Serial.println("before: xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);");
             xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);
             _currentWriteBuffer = NULL;
+            // Serial.println("after: xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);");
         }
     }
 
@@ -131,7 +133,10 @@ private:
     {
         if (_currentReadBuffer == NULL)
         {
+            // Serial.println("before: xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);");
             xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);
+            _currentReadBuffer->clear();
+            // Serial.println("after: xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);");
         }
     }
 

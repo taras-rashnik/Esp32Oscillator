@@ -30,6 +30,8 @@ protected:
         sample_t array[_chunkSize];
         size_t numOfIterations = _dataLength / _chunkSize;
 
+        // Serial.println("ReadingTask::run() begin");
+
         for (size_t i = 0; i < numOfIterations; i++)
         {
             _queue.read(array, _chunkSize);
@@ -44,7 +46,11 @@ protected:
             }
 
             delay(_delayMs);
+
+            // Serial.println(String("ReadingTask::run() i: ") + i);
         }
+
+        // Serial.println("ReadingTask::run() end");
     }
 };
 
