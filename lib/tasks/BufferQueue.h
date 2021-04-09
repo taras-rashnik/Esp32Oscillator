@@ -4,26 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <noncopyable.hpp>
-
-typedef uint8_t sample_t;
-
-class Buffer : boost::noncopyable
-{
-private:
-    sample_t* const _pArray;
-    const size_t _size;
-
-public:
-    Buffer(sample_t *pArray, size_t size)
-        : _pArray(pArray), _size(size)
-    {
-    }
-
-    void clear()
-    {
-        memset(_pArray, 0, sizeof(sample_t) * _size);
-    }
-};
+#include "Buffer.h"
 
 class BufferQueue : boost::noncopyable
 {
@@ -36,6 +17,9 @@ private:
 
     sample_t *_pArray = NULL;
 
+    WriteBuffer *_currentWriteBuffer = NULL;
+    ReadBuffer *_currentReadBuffer = NULL;
+
 public:
     BufferQueue(size_t bufferSize, size_t numberOfBuffers)
         : _bufferSize(bufferSize),
@@ -47,27 +31,118 @@ public:
 
         for (size_t i = 0; i < numberOfBuffers; i++)
         {
-            Buffer *pBuffer = new Buffer(_pArray + i, bufferSize);
-            pBuffer->clear();
-            xQueueSend(_emptyQueueHandle, pBuffer, portMAX_DELAY);
+            // fill emptyQueue with new empty Buffers
+            Buffer *pBuffer = new Buffer(_pArray + i, _bufferSize);
+            xQueueSend(_emptyQueueHandle, &pBuffer, portMAX_DELAY);
         }
     }
 
     ~BufferQueue()
     {
-        // TODO: delete all Buffers* inside both queue
+        // TODO: free all Buffers in both queues
         vQueueDelete(_fullQueueHandle);
         vQueueDelete(_emptyQueueHandle);
         delete _pArray;
         _pArray = NULL;
     }
 
+    // emptyQueue -> write() -> fullQueue
     void write(const sample_t *pSourceArray, size_t size)
     {
+        do
+        {
+            WriteBuffer *pBuffer = writeBuffer();
+            size_t written = pBuffer->write(pSourceArray, size);
+
+            size -= written;
+            pSourceArray += written;
+
+        } while (size > 0);
+
+        sendWriteBufferIfFull();
     }
 
+    // fullQueue -> read() -> emptyQueue
     void read(sample_t *pTargetArray, size_t size)
     {
+        do
+        {
+            ReadBuffer *pBuffer = readBuffer();
+            size_t read = pBuffer->read(pTargetArray, size);
+
+            size -= read;
+            pTargetArray += read;
+
+        } while (size > 0);
+
+        sendBackReadBufferIfEmpty();
+    }
+
+private:
+    WriteBuffer *writeBuffer()
+    {
+        if (_currentWriteBuffer == NULL)
+        {
+            receiveNewEmptyWriteBuffer();
+        }
+        else if (_currentWriteBuffer->full())
+        {
+            sendWriteBufferIfFull();
+            receiveNewEmptyWriteBuffer();
+        }
+
+        return _currentWriteBuffer;
+    }
+
+    void sendWriteBufferIfFull()
+    {
+        if (_currentWriteBuffer != NULL && _currentWriteBuffer->full())
+        {
+            xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);
+            _currentWriteBuffer = NULL;
+        }
+    }
+
+    void receiveNewEmptyWriteBuffer()
+    {
+        if (_currentWriteBuffer == NULL)
+        {
+            xQueueReceive(_emptyQueueHandle, &_currentWriteBuffer, portMAX_DELAY);
+            _currentWriteBuffer->clear();
+        }
+    }
+
+    ReadBuffer *readBuffer()
+    {
+        if (_currentReadBuffer == NULL)
+        {
+            receiveNewFullReadBuffer();
+        }
+        else if (_currentReadBuffer->empty())
+        {
+            sendBackReadBufferIfEmpty();
+            receiveNewFullReadBuffer();
+        }
+
+        return _currentReadBuffer;
+    }
+
+    void receiveNewFullReadBuffer()
+    {
+        if (_currentReadBuffer == NULL)
+        {
+            xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);
+        }
+    }
+
+    void sendBackReadBufferIfEmpty()
+    {
+        if (_currentReadBuffer != NULL && _currentReadBuffer->empty())
+        {
+            _currentReadBuffer->clear();
+            xQueueSend(_emptyQueueHandle, &_currentReadBuffer, portMAX_DELAY);
+            _currentReadBuffer = NULL;
+        }
     }
 };
 
