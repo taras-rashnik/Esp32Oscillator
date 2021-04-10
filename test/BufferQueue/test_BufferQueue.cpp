@@ -112,13 +112,46 @@ void test_write_read2(void)
 
 void test_write_read3(void)
 {
-    runTest({.bufferSize = 16,
+    runTest({.bufferSize = 3,
+             .numberOfBuffers = 3,
+             .writeChunkSize = 4,
+             .readChunkSize = 6,
+             .dataLength = 240,
+             .writeDelayMs = 20,
+             .readDelayMs = 20});
+}
+
+void test_write_read4(void)
+{
+    runTest({.bufferSize = 8,
              .numberOfBuffers = 4,
              .writeChunkSize = 16,
              .readChunkSize = 16,
              .dataLength = 240,
              .writeDelayMs = 20,
+             .readDelayMs = 1});
+}
+
+void test_write_read5(void)
+{
+    runTest({.bufferSize = 16,
+             .numberOfBuffers = 4,
+             .writeChunkSize = 4,
+             .readChunkSize = 8,
+             .dataLength = 256,
+             .writeDelayMs = 1,
              .readDelayMs = 20});
+}
+
+void test_write_read6(void)
+{
+    runTest({.bufferSize = 8,
+             .numberOfBuffers = 2,
+             .writeChunkSize = 4,
+             .readChunkSize = 16,
+             .dataLength = 256,
+             .writeDelayMs = 0,
+             .readDelayMs = 0});
 }
 
 void setup()
@@ -129,6 +162,9 @@ void setup()
     RUN_TEST(test_write_read_synchronously);
     RUN_TEST(test_write_read2);
     RUN_TEST(test_write_read3);
+    RUN_TEST(test_write_read4);
+    RUN_TEST(test_write_read5);
+    RUN_TEST(test_write_read6);
     UNITY_END(); // stop unit testing
 }
 
