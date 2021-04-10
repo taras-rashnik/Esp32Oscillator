@@ -40,7 +40,7 @@ void tearDown()
 
 void test_constructor()
 {
-    Buffer buffer(bufferArray, bufferSize);
+    Buffer buffer(bufferArray, bufferSize, 0);
 
     TEST_ASSERT_FALSE(buffer.empty());
     TEST_ASSERT_FALSE(buffer.full());
@@ -48,7 +48,7 @@ void test_constructor()
 
 void test_write_read()
 {
-    Buffer buffer(bufferArray, bufferSize);
+    Buffer buffer(bufferArray, bufferSize, 0);
 
     size_t written = buffer.write(sourceArray, dataSize);
     TEST_ASSERT_EQUAL(bufferSize, written);
@@ -65,7 +65,7 @@ void test_write_read()
 
 void test_empty_and_full_after_read()
 {
-    Buffer buffer(bufferArray, bufferSize);
+    Buffer buffer(bufferArray, bufferSize, 0);
 
     buffer.write(sourceArray, bufferSize);
 
@@ -79,7 +79,7 @@ void test_empty_and_full_after_read()
 
 void test_empty_and_full_after_write()
 {
-    Buffer buffer(bufferArray, bufferSize);
+    Buffer buffer(bufferArray, bufferSize, 0);
 
     buffer.write(sourceArray, bufferSize / 2);
 

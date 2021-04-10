@@ -33,7 +33,7 @@ void tearDown()
 
 void test_constructor()
 {
-    WriteBuffer buffer(bufferArray, bufferSize);
+    WriteBuffer buffer(bufferArray, bufferSize, 0);
     TEST_ASSERT_FALSE(buffer.full());
 }
 

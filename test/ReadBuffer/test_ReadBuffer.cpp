@@ -33,13 +33,13 @@ void tearDown()
 
 void test_constructor()
 {
-    ReadBuffer buffer(bufferArray, bufferSize);
+    ReadBuffer buffer(bufferArray, bufferSize, 0);
     TEST_ASSERT_FALSE(buffer.empty());
 }
 
 void test_empty_after_read()
 {
-    ReadBuffer buffer(bufferArray, bufferSize);
+    ReadBuffer buffer(bufferArray, bufferSize, 0);
 
     buffer.read(targetArray, bufferSize);
     TEST_ASSERT_TRUE(buffer.empty());
@@ -47,7 +47,7 @@ void test_empty_after_read()
 
 void test_empty_after_clear()
 {
-    ReadBuffer buffer(bufferArray, bufferSize);
+    ReadBuffer buffer(bufferArray, bufferSize, 0);
 
     buffer.read(targetArray, bufferSize);
     TEST_ASSERT_TRUE(buffer.empty());
@@ -58,7 +58,7 @@ void test_empty_after_clear()
 
 void test_read()
 {
-    ReadBuffer buffer(bufferArray, bufferSize);
+    ReadBuffer buffer(bufferArray, bufferSize, 0);
 
     size_t read = buffer.read(targetArray, dataSize);
     TEST_ASSERT_EQUAL_INT32(bufferSize, read);
@@ -71,13 +71,13 @@ void test_read()
 
 void test_read2()
 {
-    ReadBuffer buffer(bufferArray, bufferSize);
+    ReadBuffer buffer(bufferArray, bufferSize, 0);
 
-    size_t read = buffer.read(targetArray, bufferSize/2);
-    TEST_ASSERT_EQUAL_INT32(bufferSize/2, read);
+    size_t read = buffer.read(targetArray, bufferSize / 2);
+    TEST_ASSERT_EQUAL_INT32(bufferSize / 2, read);
 
-    read = buffer.read(targetArray + read, bufferSize/2);
-    TEST_ASSERT_EQUAL_INT32(bufferSize/2, read);
+    read = buffer.read(targetArray + read, bufferSize / 2);
+    TEST_ASSERT_EQUAL_INT32(bufferSize / 2, read);
 
     for (size_t i = 0; i < bufferSize; i++)
     {
