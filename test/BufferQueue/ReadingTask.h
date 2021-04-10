@@ -14,6 +14,7 @@ private:
     const uint32_t _delayMs;
 
     volatile bool _success = true;
+    volatile size_t _samplesCounter = 0;
 
 public:
     ReadingTask(BufferQueue &queue, size_t chunkSize, size_t dataLength, uint32_t delayMs)
@@ -23,34 +24,31 @@ public:
 
     bool success() { return _success; }
 
+    size_t bytes() { return _samplesCounter; }
+
 protected:
     virtual void run()
     {
-        size_t samplesCounter = 0;
+        _samplesCounter = 0;
         sample_t array[_chunkSize];
         size_t numOfIterations = _dataLength / _chunkSize;
 
-        // Serial.println("ReadingTask::run() begin");
-
         for (size_t i = 0; i < numOfIterations; i++)
         {
+            _queue.print();
             _queue.read(array, _chunkSize);
 
             // check data in buffer
             for (size_t j = 0; j < _chunkSize; j++)
             {
-                if (array[j] != samplesCounter++)
+                if (array[j] != _samplesCounter++)
                 {
                     _success = false;
                 }
             }
 
             delay(_delayMs);
-
-            // Serial.println(String("ReadingTask::run() i: ") + i);
         }
-
-        // Serial.println("ReadingTask::run() end");
     }
 };
 

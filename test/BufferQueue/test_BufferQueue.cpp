@@ -1,3 +1,5 @@
+// #define PRINT_DEBUG
+
 #include <Arduino.h>
 #include <unity.h>
 #include <BufferQueue.h>
@@ -9,19 +11,22 @@ void test_constructor(void)
     BufferQueue queue(1024, 8);
 }
 
-void test_write_read(void)
+typedef struct
 {
-    size_t bufferSize = 16;
-    size_t numberOfBuffers = 4;
-    size_t writeChunkSize = 16;
-    size_t readChunkSize = 16;
-    size_t dataLength = 240;
-    uint32_t writeDelayMs = 20;
-    uint32_t readDelayMs = 20;
+    size_t bufferSize;
+    size_t numberOfBuffers;
+    size_t writeChunkSize;
+    size_t readChunkSize;
+    size_t dataLength;
+    uint32_t writeDelayMs;
+    uint32_t readDelayMs;
+} TestParams;
 
-    BufferQueue queue(bufferSize, numberOfBuffers);
-    WritingTask writingTask(queue, writeChunkSize, dataLength, writeDelayMs);
-    ReadingTask readingTask(queue, readChunkSize, dataLength, readDelayMs);
+void runTest(const TestParams &params)
+{
+    BufferQueue queue(params.bufferSize, params.numberOfBuffers);
+    WritingTask writingTask(queue, params.writeChunkSize, params.dataLength, params.writeDelayMs);
+    ReadingTask readingTask(queue, params.readChunkSize, params.dataLength, params.readDelayMs);
 
     writingTask.start();
     readingTask.start();
@@ -30,6 +35,90 @@ void test_write_read(void)
     readingTask.join();
 
     TEST_ASSERT_TRUE(readingTask.success());
+    TEST_ASSERT_EQUAL(params.dataLength, readingTask.bytes());
+}
+
+void runTestSync(const TestParams &params)
+{
+    BufferQueue queue(params.bufferSize, params.numberOfBuffers);
+
+    // write all
+    sample_t writeArr[params.writeChunkSize];
+    size_t writeCounter = 0;
+    size_t numWriteIterations = params.dataLength / params.writeChunkSize;
+
+    for (size_t i = 0; i < numWriteIterations; i++)
+    {
+        for (size_t j = 0; j < params.writeChunkSize; j++)
+        {
+            writeArr[j] = writeCounter++;
+        }
+
+        queue.write(writeArr, params.writeChunkSize);
+        queue.print();
+    }
+
+    // read all
+    sample_t readArr[params.readChunkSize];
+    size_t readCounter = 0;
+    size_t numReadIterations = params.dataLength / params.readChunkSize;
+
+    for (size_t i = 0; i < numReadIterations; i++)
+    {
+        queue.read(readArr, params.readChunkSize);
+        queue.print();
+
+        for (size_t j = 0; j < params.readChunkSize; j++)
+        {
+            TEST_ASSERT_EQUAL(readCounter++, readArr[j]);
+        }
+    }
+
+    TEST_ASSERT_EQUAL(params.dataLength, readCounter);
+}
+
+void test_write_read_synchronously(void)
+{
+    runTestSync({.bufferSize = 4,
+                 .numberOfBuffers = 2,
+                 .writeChunkSize = 8,
+                 .readChunkSize = 8,
+                 .dataLength = 8,
+                 .writeDelayMs = 20,
+                 .readDelayMs = 20});
+}
+
+void test_write_read(void)
+{
+    runTest({.bufferSize = 16,
+             .numberOfBuffers = 4,
+             .writeChunkSize = 16,
+             .readChunkSize = 16,
+             .dataLength = 240,
+             .writeDelayMs = 20,
+             .readDelayMs = 20});
+}
+
+void test_write_read2(void)
+{
+    runTest({.bufferSize = 4,
+             .numberOfBuffers = 2,
+             .writeChunkSize = 8,
+             .readChunkSize = 8,
+             .dataLength = 8,
+             .writeDelayMs = 20,
+             .readDelayMs = 20});
+}
+
+void test_write_read3(void)
+{
+    runTest({.bufferSize = 16,
+             .numberOfBuffers = 4,
+             .writeChunkSize = 16,
+             .readChunkSize = 16,
+             .dataLength = 240,
+             .writeDelayMs = 20,
+             .readDelayMs = 20});
 }
 
 void setup()
@@ -37,6 +126,9 @@ void setup()
     UNITY_BEGIN(); // IMPORTANT LINE!
     RUN_TEST(test_constructor);
     RUN_TEST(test_write_read);
+    RUN_TEST(test_write_read_synchronously);
+    RUN_TEST(test_write_read2);
+    RUN_TEST(test_write_read3);
     UNITY_END(); // stop unit testing
 }
 

@@ -26,8 +26,6 @@ protected:
         sample_t array[_chunkSize];
         size_t numOfIterations = _dataLength / _chunkSize;
 
-        // Serial.println("WritingTask::run() begin");
-
         for (size_t i = 0; i < numOfIterations; i++)
         {
             // prepare buffer
@@ -37,12 +35,9 @@ protected:
             }
 
             _queue.write(array, _chunkSize);
+            _queue.print();
             delay(_delayMs);
-
-            // Serial.println(String("WritingTask::run() i: ") + i);
         }
-
-        // Serial.println("WritingTask::run() end");
     }
 };
 

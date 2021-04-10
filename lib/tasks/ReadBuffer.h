@@ -13,12 +13,13 @@ class ReadBuffer : boost::noncopyable
 private:
     sample_t *const _pArray;
     const size_t _size;
+    const size_t _index;
 
     volatile size_t _readIndex = 0;
 
 public:
-    ReadBuffer(sample_t *pArray, size_t size)
-        : _pArray(pArray), _size(size)
+    ReadBuffer(sample_t *pArray, size_t size, size_t index)
+        : _pArray(pArray), _size(size), _index(index)
     {
         clear();
     }
@@ -39,6 +40,23 @@ public:
         _readIndex = 0;
     }
 
+    void print()
+    {
+#ifdef PRINT_DEBUG
+        Serial.print("ReadBuffer: index(");
+        Serial.print(_index);
+        Serial.print(")");
+
+        for (size_t i = 0; i < _readIndex; i++)
+        {
+            Serial.print(" ");
+            Serial.print(*(_pArray + i));
+        }
+
+        Serial.println();
+#endif // PRINT_DEBUG
+    }
+
 private:
     size_t freeSpaceToRead()
     {
@@ -47,4 +65,3 @@ private:
 };
 
 #endif // __READBUFFER_H__
-

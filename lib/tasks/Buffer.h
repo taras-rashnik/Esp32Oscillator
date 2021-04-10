@@ -7,8 +7,8 @@
 class Buffer : public WriteBuffer, public ReadBuffer
 {
 public:
-    Buffer(sample_t *pArray, size_t size)
-        : WriteBuffer(pArray, size), ReadBuffer(pArray, size)
+    Buffer(sample_t *pArray, size_t size, size_t index)
+        : WriteBuffer(pArray, size, index), ReadBuffer(pArray, size, index)
     {
     }
 };

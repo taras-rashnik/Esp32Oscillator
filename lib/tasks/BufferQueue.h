@@ -32,7 +32,7 @@ public:
         for (size_t i = 0; i < numberOfBuffers; i++)
         {
             // fill emptyQueue with new empty Buffers
-            Buffer *pBuffer = new Buffer(_pArray + i, _bufferSize);
+            Buffer *pBuffer = new Buffer(_pArray + (i * _bufferSize), _bufferSize, i);
             xQueueSend(_emptyQueueHandle, &pBuffer, portMAX_DELAY);
         }
     }
@@ -46,6 +46,21 @@ public:
         _pArray = NULL;
     }
 
+    void print()
+    {
+#ifdef PRINT_DEBUG
+        Serial.print("BufferQueue: ");
+
+        for (size_t i = 0; i < (_bufferSize * _numberOfBuffers); i++)
+        {
+            Serial.print(" ");
+            Serial.print(*(_pArray + i));
+        }
+
+        Serial.println();
+#endif // PRINT_DEBUG
+    }
+
     // emptyQueue -> write() -> fullQueue
     void write(const sample_t *pSourceArray, size_t size)
     {
@@ -53,6 +68,8 @@ public:
         {
             WriteBuffer *pBuffer = writeBuffer();
             size_t written = pBuffer->write(pSourceArray, size);
+
+            pBuffer->print();
 
             size -= written;
             pSourceArray += written;
@@ -69,6 +86,7 @@ public:
         {
             ReadBuffer *pBuffer = readBuffer();
             size_t read = pBuffer->read(pTargetArray, size);
+            pBuffer->print();
 
             size -= read;
             pTargetArray += read;
@@ -98,10 +116,8 @@ private:
     {
         if (_currentWriteBuffer != NULL && _currentWriteBuffer->full())
         {
-            // Serial.println("before: xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);");
             xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);
             _currentWriteBuffer = NULL;
-            // Serial.println("after: xQueueSend(_fullQueueHandle, &_currentWriteBuffer, portMAX_DELAY);");
         }
     }
 
@@ -133,10 +149,8 @@ private:
     {
         if (_currentReadBuffer == NULL)
         {
-            // Serial.println("before: xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);");
             xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);
             _currentReadBuffer->clear();
-            // Serial.println("after: xQueueReceive(_fullQueueHandle, &_currentReadBuffer, portMAX_DELAY);");
         }
     }
 

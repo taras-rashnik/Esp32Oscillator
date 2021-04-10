@@ -13,12 +13,13 @@ class WriteBuffer : boost::noncopyable
 private:
     sample_t *const _pArray;
     const size_t _size;
+    const size_t _index;
 
     volatile size_t _writeIndex = 0;
 
 public:
-    WriteBuffer(sample_t *pArray, size_t size)
-        : _pArray(pArray), _size(size)
+    WriteBuffer(sample_t *pArray, size_t size, size_t index)
+        : _pArray(pArray), _size(size), _index(index)
     {
         clear();
     }
@@ -38,6 +39,23 @@ public:
     {
         memset(_pArray, 0, sizeof(sample_t[_size]));
         _writeIndex = 0;
+    }
+
+    void print()
+    {
+#ifdef PRINT_DEBUG
+        Serial.print("WriteBuffer: index(");
+        Serial.print(_index);
+        Serial.print(")");
+
+        for (size_t i = 0; i < _writeIndex; i++)
+        {
+            Serial.print(" ");
+            Serial.print(*(_pArray + i));
+        }
+
+        Serial.println();
+#endif // PRINT_DEBUG
     }
 
 private:
