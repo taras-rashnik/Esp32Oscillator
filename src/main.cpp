@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include <M5Stack.h>
-#include "Samples.h"
-#include "SamplesGenerator.h"
-#include "Screen.h"
-
+#include <Generator.h>
+#include <GeneratorTask.h>
+#include <Screen.h>
+#include <ScreenTask.h>
+#include <BufferQueue.h>
 
 void setup()
 {
@@ -11,22 +12,29 @@ void setup()
   M5.Power.begin();
   Serial.println("Hello from Taras");
 
+  GeneratorParameters params = {
+      .samplingFrequency = 100000,
+      .signalFrequency = 1000,
+      .waveform = Waveform::Sawtooth,
+      .amplitude = 100};
+
+  Generator generator(params);
   Screen screen;
-  SamplesGenerator generator;
-  Samples samples(512);
+  BufferQueue generatorQueue(64, 8);
+  ScreenTask screenTask(screen, generatorQueue);
+  GeneratorTask generatorTask(generator, generatorQueue);
+
+  screenTask.start();
+  generatorTask.start();
 
   while (true)
   {
-    Serial.println("while (true)");
-    delay(10);
-    M5.update();
-
-    generator.writeTo(samples);
-    screen.readFrom(samples);
+    loop();
   }
 }
 
 void loop()
 {
   Serial.println("loop");
+  delay(10000);
 }

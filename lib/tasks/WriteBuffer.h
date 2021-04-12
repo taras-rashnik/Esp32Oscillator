@@ -1,12 +1,9 @@
 #if !defined(__WRITEBUFFER_H__)
 #define __WRITEBUFFER_H__
 
-#include <stdint.h>
-#include <stddef.h>
+#include <sample.h>
 #include <string.h>
 #include <noncopyable.hpp>
-
-typedef uint8_t sample_t;
 
 class WriteBuffer : boost::noncopyable
 {

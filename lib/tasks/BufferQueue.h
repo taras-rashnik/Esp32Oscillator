@@ -1,10 +1,9 @@
 #if !defined(__BUFFER_QUEUE_H__)
 #define __BUFFER_QUEUE_H__
 
-#include <stdint.h>
-#include <stddef.h>
+#include <sample.h>
 #include <noncopyable.hpp>
-#include "Buffer.h"
+#include <Buffer.h>
 
 class BufferQueue : boost::noncopyable
 {

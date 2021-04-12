@@ -1,8 +1,7 @@
 #if !defined(__READBUFFER_H__)
 #define __READBUFFER_H__
 
-#include <stdint.h>
-#include <stddef.h>
+#include <sample.h>
 #include <string.h>
 #include <noncopyable.hpp>
 
