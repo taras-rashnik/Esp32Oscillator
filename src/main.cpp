@@ -21,7 +21,7 @@ void setup()
       .samplingFrequency = 44100,
       .signalFrequency = 2000,
       .waveform = Waveform::Sawtooth,
-      .amplitude = 20};
+      .amplitude = 128};
 
   Generator generator(params);
   Screen screen;

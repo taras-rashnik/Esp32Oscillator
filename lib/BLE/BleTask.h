@@ -32,7 +32,7 @@ protected:
 
             _bleAdapter.write(buffer, bufferSize);
 
-            delay(1000);
+            delay(3000);
             Serial.println("BleTask::run()");
         }
 
