@@ -9,7 +9,7 @@ class Task : boost::noncopyable
 {
 private:
     const char *_name = "No name";
-    const uint32_t _stackSize = 2048;
+    const uint32_t _stackSize = 8192;
     const UBaseType_t _priority = 1;
     const BaseType_t _core = 1;
     
